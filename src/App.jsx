@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useTheme } from '@mui/material/styles';
 import { 
   Container, 
   Typography, 
@@ -24,14 +24,19 @@ import {
   AccordionDetails,
   Snackbar,
   Alert,
-  CircularProgress
+  CircularProgress,
+  AppBar,
+  Toolbar,
+  useMediaQuery
 } from '@mui/material';
 import { 
   Delete, 
   SportsSoccer,
   ExpandMore,
   Schedule,
-  Close
+  Close,
+  WhatsApp,
+  Telegram
 } from '@mui/icons-material';
 import { ref, onValue, set, update } from 'firebase/database';
 import { database } from './firebase';
@@ -60,6 +65,9 @@ const getTimeUntilReset = () => {
 };
 
 const App = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  
   // Состояния приложения
   const [matches, setMatches] = useState([]);
   const [expandedMatch, setExpandedMatch] = useState(null);
@@ -74,9 +82,7 @@ const App = () => {
   const [loading, setLoading] = useState(true);
   const [lastResetDate, setLastResetDate] = useState('');
   const isInitializedRef = useRef(false);
-  
 
-  // Загрузка данных из Firebase
   // Загрузка данных из Firebase
   useEffect(() => {
     const matchesRef = ref(database, 'matches');
@@ -106,14 +112,11 @@ const App = () => {
       const resetDate = snapshot.val();
       setLastResetDate(resetDate || '');
       
-      // Проверяем необходимость сброса данных только после начальной загрузки
-      if (isInitializedRef.current) {
-        const today = getTodayDateString();
-        if (resetDate !== today) {
-          resetData(today);
-        }
+      // Проверяем необходимость сброса данных
+      const today = getTodayDateString();
+      if (resetDate !== today) {
+        resetData(today);
       }
-      isInitializedRef.current = true;
     });
     
     // Обновление времени до сброса каждую минуту
@@ -249,323 +252,322 @@ const App = () => {
   }
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      <Box textAlign="center" mb={4}>
-        <SportsSoccer sx={{ fontSize: 60, color: 'success.main' }} />
-        <Typography variant="h3" gutterBottom>
-          Футбольный Организатор
-        </Typography>
-        <Typography variant="subtitle1" color="text.secondary">
-          Запишитесь на матч в удобное время
-        </Typography>
-        <Box mt={1}>
-          <Typography variant="caption" color="text.secondary">
-            Данные обновятся через: {timeUntilReset}
+    <>
+      {/* AppBar с контактами */}
+      <AppBar position="sticky" sx={{ mb: 2 }}>
+        <Toolbar>
+          <SportsSoccer sx={{ mr: 2 }} />
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            Футбольный Организатор
           </Typography>
-        </Box>
-      </Box>
+          
+          {/* Иконки мессенджеров */}
+          <IconButton 
+            color="inherit" 
+            href="https://wa.me/79991234567" // Замените на свой номер
+            target="_blank"
+            sx={{ mx: 0.5 }}
+          >
+            <WhatsApp fontSize={isMobile ? "small" : "medium"} />
+          </IconButton>
+          <IconButton 
+            color="inherit" 
+            href="https://t.me/yourusername" // Замените на свой username
+            target="_blank"
+            sx={{ mx: 0.5 }}
+          >
+            <Telegram fontSize={isMobile ? "small" : "medium"} />
+          </IconButton>
+        </Toolbar>
+      </AppBar>
 
-      {/* Доступные матчи */}
-      <Grid container spacing={3} justifyContent="center">
-        {matches.length > 0 ? (
-          matches.map((match) => (
-            <Grid item xs={12} sm={6} md={4} key={match.id}>
-              <Card 
-                variant="outlined" 
-                sx={{ 
-                  border: '2px solid',
-                  borderColor: 'primary.main',
-                  borderRadius: 2,
+      <Container maxWidth="md" sx={{ py: 1, pb: isMobile ? 7 : 4 }}>
+        {/* Информация о времени до сброса */}
+        {!isMobile && (
+          <Box textAlign="center" mb={3}>
+            <Typography variant="subtitle1" gutterBottom>
+              Запишитесь на матч в удобное время
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Данные обновятся через: {timeUntilReset}
+            </Typography>
+          </Box>
+        )}
+
+        {/* Карточки матчей */}
+        <Grid container spacing={isMobile ? 1 : 2} justifyContent="center">
+          {matches.length > 0 ? (
+            matches.map((match) => (
+              <Grid key={match.id} xs={12} sm={6} md={4}>
+                <Card sx={{ 
                   height: '100%',
                   display: 'flex',
                   flexDirection: 'column',
-                  transition: 'transform 0.3s',
-                  '&:hover': {
-                    transform: 'scale(1.03)',
-                    boxShadow: 3
-                  }
-                }}
+                  border: '2px solid',
+                  borderColor: 'primary.main'
+                }}>
+                  <CardContent sx={{ flexGrow: 1, p: isMobile ? 1 : 2 }}>
+                    <Box display="flex" alignItems="center" justifyContent="center">
+                      <Schedule sx={{ mr: 1, fontSize: isMobile ? '1rem' : '1.25rem' }} />
+                      <Typography variant={isMobile ? "subtitle1" : "h6"} align="center">
+                        {match.time}
+                      </Typography>
+                    </Box>
+                    
+                    <Grid container spacing={0} mt={1}>
+                      <Grid xs={6} sx={{ textAlign: 'center' }}>
+                        <Typography variant="body2">Команда 1</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          ({match.team1?.length || 0})
+                        </Typography>
+                      </Grid>
+                      <Grid xs={6} sx={{ textAlign: 'center' }}>
+                        <Typography variant="body2">Команда 2</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          ({match.team2?.length || 0})
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                  </CardContent>
+                  
+                  <Box sx={{ p: isMobile ? 1 : 2 }}>
+                    <Button 
+                      variant="contained" 
+                      size={isMobile ? "small" : "medium"}
+                      fullWidth
+                      onClick={() => handleOpen(match)}
+                    >
+                      Записаться
+                    </Button>
+                  </Box>
+                </Card>
+              </Grid>
+            ))
+          ) : (
+            <Grid xs={12}>
+              <Typography variant="h6" align="center" color="text.secondary">
+                Нет доступных матчей
+              </Typography>
+            </Grid>
+          )}
+        </Grid>
+
+        {/* Списки записей */}
+        <Box mt={isMobile ? 2 : 4}>
+          <Typography variant="h6" align="center" gutterBottom>
+            Текущие записи
+          </Typography>
+          
+          {matches.length > 0 ? (
+            matches.map((match) => (
+              <Accordion 
+                key={match.id}
+                expanded={expandedMatch === match.id}
+                onChange={handleAccordionChange(match.id)}
+                sx={{ mb: 1 }}
               >
-                <CardContent sx={{ flexGrow: 1 }}>
-                  <Box display="flex" alignItems="center" justifyContent="center" mb={1}>
-                    <Schedule sx={{ mr: 1, color: 'action.active' }} />
-                    <Typography variant="h5" align="center" gutterBottom>
-                      {match.time}
+                <AccordionSummary expandIcon={<ExpandMore />}>
+                  <Box sx={{ width: '100%' }}>
+                    <Typography variant="subtitle1">
+                      {match.time} <Typography component="span" color="text.secondary">({(match.team1?.length || 0) + (match.team2?.length || 0)})</Typography>
                     </Typography>
                   </Box>
-                  
-                  <Grid container spacing={1} mt={2}>
-                    <Grid item xs={6}>
-                      <Typography variant="subtitle1" align="center">
-                        Команда 1
-                      </Typography>
-                      <Typography variant="body2" align="center" color="text.secondary">
-                        ({match.team1?.length || 0} игроков)
-                      </Typography>
+                </AccordionSummary>
+                
+                <AccordionDetails sx={{ p: isMobile ? 0 : 2 }}>
+                  <Grid container spacing={1}>
+                    <Grid xs={12} sm={6}>
+                      <Paper elevation={0} sx={{ p: 1 }}>
+                        <Typography variant="body2" fontWeight="bold">
+                          Команда 1
+                        </Typography>
+                        <List dense>
+                          {match.team1?.map((player) => (
+                            <ListItem key={player.id} sx={{ px: 0 }}>
+                              <ListItemText
+                                primary={player.name}
+                                secondary={player.phone}
+                                primaryTypographyProps={{ variant: 'body2' }}
+                              />
+                              <ListItemSecondaryAction>
+                                <IconButton
+                                  edge="end"
+                                  size="small"
+                                  onClick={() => removePlayer(match.id, 'team1', player.id)}
+                                >
+                                  <Delete fontSize="small" />
+                                </IconButton>
+                              </ListItemSecondaryAction>
+                            </ListItem>
+                          ))}
+                          {!match.team1 || match.team1.length === 0 && (
+                            <Typography variant="body2" color="text.secondary" align="center" py={1}>
+                              Нет записей
+                            </Typography>
+                          )}
+                        </List>
+                      </Paper>
                     </Grid>
-                    <Grid item xs={6}>
-                      <Typography variant="subtitle1" align="center">
-                        Команда 2
-                      </Typography>
-                      <Typography variant="body2" align="center" color="text.secondary">
-                        ({match.team2?.length || 0} игроков)
-                      </Typography>
+                    <Grid xs={12} sm={6}>
+                      <Paper elevation={0} sx={{ p: 1 }}>
+                        <Typography variant="body2" fontWeight="bold">
+                          Команда 2
+                        </Typography>
+                        <List dense>
+                          {match.team2?.map((player) => (
+                            <ListItem key={player.id} sx={{ px: 0 }}>
+                              <ListItemText
+                                primary={player.name}
+                                secondary={player.phone}
+                                primaryTypographyProps={{ variant: 'body2' }}
+                              />
+                              <ListItemSecondaryAction>
+                                <IconButton
+                                  edge="end"
+                                  size="small"
+                                  onClick={() => removePlayer(match.id, 'team2', player.id)}
+                                >
+                                  <Delete fontSize="small" />
+                                </IconButton>
+                              </ListItemSecondaryAction>
+                            </ListItem>
+                          ))}
+                          {!match.team2 || match.team2.length === 0 && (
+                            <Typography variant="body2" color="text.secondary" align="center" py={1}>
+                              Нет записей
+                            </Typography>
+                          )}
+                        </List>
+                      </Paper>
                     </Grid>
                   </Grid>
-                </CardContent>
-                
-                <Box sx={{ p: 2, textAlign: 'center' }}>
-                  <Button 
-                    variant="contained" 
-                    color="primary"
-                    onClick={() => handleOpen(match)}
-                    fullWidth
-                    sx={{ fontWeight: 'bold' }}
-                  >
-                    Записаться
-                  </Button>
-                </Box>
-              </Card>
-            </Grid>
-          ))
-        ) : (
-          <Grid item xs={12}>
-            <Typography variant="h6" align="center" color="text.secondary">
-              Нет доступных матчей
+                </AccordionDetails>
+              </Accordion>
+            ))
+          ) : (
+            <Typography variant="body1" align="center" color="text.secondary">
+              Нет данных о матчах
             </Typography>
-          </Grid>
-        )}
-      </Grid>
+          )}
+        </Box>
 
-      {/* Модальное окно записи */}
-      <Dialog open={openModal} onClose={handleClose} fullWidth maxWidth="sm">
-        <DialogTitle sx={{ 
-          bgcolor: 'primary.main', 
-          color: 'white',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <span>Запись на матч: {selectedMatch?.time}</span>
-          <IconButton onClick={handleClose} sx={{ color: 'white' }}>
-            <Close />
-          </IconButton>
-        </DialogTitle>
-        
-        <DialogContent sx={{ py: 3 }}>
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
-              <TextField
-                label="ФИО"
-                fullWidth
-                value={playerName}
-                onChange={(e) => setPlayerName(e.target.value)}
-                variant="outlined"
-                required
-                autoFocus
-              />
-            </Grid>
+        {/* Модальное окно записи */}
+        <Dialog 
+          open={openModal} 
+          onClose={handleClose}
+          fullScreen={isMobile}
+          fullWidth
+          maxWidth="sm"
+        >
+          <DialogTitle sx={{ 
+            bgcolor: 'primary.main', 
+            color: 'white',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            py: isMobile ? 1 : 2
+          }}>
+            <span>Запись на {selectedMatch?.time}</span>
+            <IconButton onClick={handleClose} sx={{ color: 'white' }}>
+              <Close />
+            </IconButton>
+          </DialogTitle>
+          
+          <DialogContent sx={{ py: 2 }}>
+            <TextField
+              label="ФИО"
+              fullWidth
+              margin="normal"
+              size={isMobile ? "small" : "medium"}
+              value={playerName}
+              onChange={(e) => setPlayerName(e.target.value)}
+              autoFocus
+            />
             
-            <Grid item xs={12}>
-              <TextField
-                label="Номер телефона"
-                fullWidth
-                value={playerPhone}
-                onChange={(e) => setPlayerPhone(e.target.value)}
-                variant="outlined"
-                required
-              />
-            </Grid>
+            <TextField
+              label="Номер телефона"
+              fullWidth
+              margin="normal"
+              size={isMobile ? "small" : "medium"}
+              value={playerPhone}
+              onChange={(e) => setPlayerPhone(e.target.value)}
+            />
             
-            <Grid item xs={6}>
-              <Paper 
-                elevation={selectedTeam === 'team1' ? 3 : 0}
-                sx={{ 
-                  p: 2, 
-                  cursor: 'pointer', 
-                  border: selectedTeam === 'team1' ? '2px solid #1976d2' : '1px solid #ddd',
-                  borderRadius: 1,
-                  bgcolor: selectedTeam === 'team1' ? '#e3f2fd' : 'inherit',
-                  transition: 'all 0.3s',
-                  height: '100%'
-                }}
-                onClick={() => setSelectedTeam('team1')}
-              >
-                <Typography variant="h6" align="center">
+            <Typography variant="subtitle2" mt={2} mb={1}>
+              Выберите команду:
+            </Typography>
+            
+            <Grid container spacing={1}>
+              <Grid xs={6}>
+                <Button
+                  fullWidth
+                  variant={selectedTeam === 'team1' ? 'contained' : 'outlined'}
+                  size={isMobile ? "small" : "medium"}
+                  onClick={() => setSelectedTeam('team1')}
+                  sx={{ py: 1 }}
+                >
                   Команда 1
-                </Typography>
-                <Typography variant="body2" align="center" color="text.secondary">
-                  {selectedMatch?.team1?.length || 0} игроков
-                </Typography>
-              </Paper>
-            </Grid>
-            
-            <Grid item xs={6}>
-              <Paper 
-                elevation={selectedTeam === 'team2' ? 3 : 0}
-                sx={{ 
-                  p: 2, 
-                  cursor: 'pointer', 
-                  border: selectedTeam === 'team2' ? '2px solid #1976d2' : '1px solid #ddd',
-                  borderRadius: 1,
-                  bgcolor: selectedTeam === 'team2' ? '#e3f2fd' : 'inherit',
-                  transition: 'all 0.3s',
-                  height: '100%'
-                }}
-                onClick={() => setSelectedTeam('team2')}
-              >
-                <Typography variant="h6" align="center">
+                </Button>
+              </Grid>
+              <Grid xs={6}>
+                <Button
+                  fullWidth
+                  variant={selectedTeam === 'team2' ? 'contained' : 'outlined'}
+                  size={isMobile ? "small" : "medium"}
+                  onClick={() => setSelectedTeam('team2')}
+                  sx={{ py: 1 }}
+                >
                   Команда 2
-                </Typography>
-                <Typography variant="body2" align="center" color="text.secondary">
-                  {selectedMatch?.team2?.length || 0} игроков
-                </Typography>
-              </Paper>
+                </Button>
+              </Grid>
             </Grid>
             
             {error && (
-              <Grid item xs={12}>
-                <Alert severity="error" sx={{ width: '100%' }}>
-                  {error}
-                </Alert>
-              </Grid>
+              <Alert severity="error" sx={{ mt: 2 }}>
+                {error}
+              </Alert>
             )}
-          </Grid>
-        </DialogContent>
-        
-        <DialogActions>
-          <Button onClick={handleClose} variant="outlined">Отмена</Button>
-          <Button 
-            variant="contained" 
-            color="primary" 
-            onClick={addPlayer}
-            disabled={!playerName || !playerPhone || !selectedTeam}
-          >
-            Подтвердить запись
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Списки записей с аккордеоном */}
-      <Box mt={6}>
-        <Typography variant="h5" align="center" gutterBottom>
-          Текущие записи
-        </Typography>
-        
-        {matches.length > 0 ? (
-          matches.map((match) => (
-            <Accordion 
-              key={match.id} 
-              expanded={expandedMatch === match.id}
-              onChange={handleAccordionChange(match.id)}
-              sx={{ mb: 2, border: '1px solid #ddd', borderRadius: 1 }}
+          </DialogContent>
+          
+          <DialogActions sx={{ px: isMobile ? 1 : 3, py: isMobile ? 1 : 2 }}>
+            <Button 
+              onClick={handleClose}
+              size={isMobile ? "small" : "medium"}
+              variant="outlined"
             >
-              <AccordionSummary expandIcon={<ExpandMore />}>
-                <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                  <Schedule sx={{ mr: 2, color: 'action.active' }} />
-                  <Typography variant="h6" sx={{ flexGrow: 1 }}>
-                    {match.time}
-                  </Typography>
-                  <Typography variant="subtitle2" color="text.secondary">
-                    {(match.team1?.length || 0) + (match.team2?.length || 0)} игроков
-                  </Typography>
-                </Box>
-              </AccordionSummary>
-              
-              <AccordionDetails>
-                <Grid container spacing={3}>
-                  {['team1', 'team2'].map((team) => (
-                    <Grid item xs={12} md={6} key={team}>
-                      <Card variant="outlined">
-                        <CardContent>
-                          <Typography 
-                            variant="subtitle1" 
-                            gutterBottom 
-                            sx={{ 
-                              fontWeight: 'bold',
-                              color: team === 'team1' ? 'primary.main' : 'secondary.main'
-                            }}
-                          >
-                            {team === 'team1' ? 'Команда 1' : 'Команда 2'}
-                            <Typography 
-                              component="span" 
-                              sx={{ 
-                                ml: 1,
-                                fontSize: '0.8rem',
-                                color: 'text.secondary'
-                              }}
-                            >
-                              ({match[team]?.length || 0} игроков)
-                            </Typography>
-                          </Typography>
-                          
-                          {!match[team] || match[team].length === 0 ? (
-                            <Typography 
-                              variant="body2" 
-                              color="text.secondary" 
-                              align="center" 
-                              py={2}
-                            >
-                              Нет записей
-                            </Typography>
-                          ) : (
-                            <List dense>
-                              {match[team].map((player) => (
-                                <ListItem 
-                                  key={player.id} 
-                                  sx={{ 
-                                    borderBottom: '1px solid #f5f5f5',
-                                    '&:hover': { backgroundColor: '#f9f9f9' }
-                                  }}
-                                >
-                                  <ListItemText
-                                    primary={player.name}
-                                    secondary={player.phone}
-                                  />
-                                  <ListItemSecondaryAction>
-                                    <IconButton
-                                      edge="end"
-                                      onClick={() => removePlayer(match.id, team, player.id)}
-                                      size="small"
-                                    >
-                                      <Delete color="error" fontSize="small" />
-                                    </IconButton>
-                                  </ListItemSecondaryAction>
-                                </ListItem>
-                              ))}
-                            </List>
-                          )}
-                        </CardContent>
-                      </Card>
-                    </Grid>
-                  ))}
-                </Grid>
-              </AccordionDetails>
-            </Accordion>
-          ))
-        ) : (
-          <Typography variant="body1" align="center" color="text.secondary">
-            Нет данных о матчах
-          </Typography>
-        )}
-      </Box>
+              Отмена
+            </Button>
+            <Button 
+              variant="contained"
+              onClick={addPlayer}
+              disabled={!playerName || !playerPhone || !selectedTeam}
+              size={isMobile ? "small" : "medium"}
+            >
+              Подтвердить
+            </Button>
+          </DialogActions>
+        </Dialog>
 
-      {/* Уведомления */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={3000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-      >
-        <Alert 
-          onClose={handleCloseSnackbar} 
-          severity={snackbar.message.includes('Ошибка') ? "error" : "success"}
-          sx={{ width: '100%' }}
+        {/* Уведомления */}
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={3000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ 
+            vertical: isMobile ? 'bottom' : 'top', 
+            horizontal: 'center' 
+          }}
         >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-    </Container>
+          <Alert 
+            onClose={handleCloseSnackbar} 
+            severity={snackbar.message.includes('Ошибка') ? "error" : "success"}
+            sx={{ width: '100%' }}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
+      </Container>
+    </>
   );
 };
 
