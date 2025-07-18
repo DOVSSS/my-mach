@@ -38,10 +38,10 @@ import { database } from './firebase';
 // Генерация уникального ID
 const generateId = () => Math.random().toString(36).substr(2, 9);
 
-// Проверка, наступил ли новый день
-const isNewDay = (lastReset) => {
-  const today = new Date().toLocaleDateString();
-  return lastReset !== today;
+// Единая функция для получения текущей даты в формате YYYY-MM-DD
+const getTodayDateString = () => {
+  const now = new Date();
+  return now.toISOString().split('T')[0];
 };
 
 // Получение времени до следующего сброса
@@ -72,7 +72,10 @@ const App = () => {
   const [timeUntilReset, setTimeUntilReset] = useState('');
   const [loading, setLoading] = useState(true);
   const [lastResetDate, setLastResetDate] = useState('');
+  const isInitializedRef = useRef(false);
+  
 
+  // Загрузка данных из Firebase
   // Загрузка данных из Firebase
   useEffect(() => {
     const matchesRef = ref(database, 'matches');
@@ -82,10 +85,9 @@ const App = () => {
     const matchesListener = onValue(matchesRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        // Преобразование объекта в массив
         const matchesArray = Object.keys(data).map(key => ({
           ...data[key],
-          id: key // Сохраняем ключ как ID
+          id: key
         }));
         setMatches(matchesArray);
       } else {
@@ -99,36 +101,34 @@ const App = () => {
     });
     
     // Загрузка даты последнего сброса
-    onValue(resetRef, (snapshot) => {
+    const resetListener = onValue(resetRef, (snapshot) => {
       const resetDate = snapshot.val();
       setLastResetDate(resetDate || '');
-      setTimeUntilReset(getTimeUntilReset());
-    }, (error) => {
-      console.error("Ошибка загрузки даты сброса: ", error);
+      
+      // Проверяем необходимость сброса данных только после начальной загрузки
+      if (isInitializedRef.current) {
+        const today = getTodayDateString();
+        if (resetDate !== today) {
+          resetData(today);
+        }
+      }
+      isInitializedRef.current = true;
     });
     
-    // Проверка сброса данных
-    const checkReset = () => {
-      const today = new Date().toLocaleDateString();
-      if (isNewDay(lastResetDate)) {
-        resetData(today);
-      }
-    };
-    
-    // Проверка каждую минуту
-    const timer = setInterval(() => {
+    // Обновление времени до сброса каждую минуту
+    const timerId = setInterval(() => {
       setTimeUntilReset(getTimeUntilReset());
-      checkReset();
     }, 60000);
     
-    // Первоначальная проверка
-    checkReset();
+    // Первоначальная установка времени
+    setTimeUntilReset(getTimeUntilReset());
     
     return () => {
-      clearInterval(timer);
+      clearInterval(timerId);
       matchesListener();
+      resetListener();
     };
-  }, [lastResetDate]);
+  }, []);
 
   // Сброс данных в 00:00
   const resetData = (today) => {
