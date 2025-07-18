@@ -258,7 +258,7 @@ const App = () => {
 <Box
       sx={{
         minHeight: '100vh',
-        backgroundImage: 'url(public/dffdss.jpg)',
+        backgroundImage: 'url(images/dffdss.jpg)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundAttachment: 'fixed',
