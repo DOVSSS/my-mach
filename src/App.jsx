@@ -139,9 +139,9 @@ const App = () => {
   const resetData = (today) => {
     // Формируем объект для матчей
     const initialMatches = {
-      match1: { time: 'ИГРА-13:00', team1: [], team2: [] },
-      match2: { time: 'ИГРА-15:00', team1: [], team2: [] },
-      match3: { time: 'ИГРА-19:00', team1: [], team2: [] }
+      match1: { time: 'ИГРА-20:00', team1: [], team2: [] },
+      match2: { time: 'ИГРА-21:00', team1: [], team2: [] },
+      match3: { time: 'ИГРА-22:00', team1: [], team2: [] }
     };
     
     const updates = {
@@ -269,14 +269,14 @@ const App = () => {
       <AppBar position="sticky" sx={{ mb: 2 }}>
         <Toolbar>
           <SportsSoccer sx={{ mr: 2 }} />
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Футбольный Организатор
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }} color='white'>
+            Футбол в Грозном
           </Typography>
           
           {/* Иконки мессенджеров */}
           <IconButton 
             color="inherit" 
-            href="https://wa.me/79991234567" // Замените на свой номер
+            href="https://wa.me/79288384941" // Замените на свой номер
             target="_blank"
             sx={{ mx: 0.5 }}
           >
@@ -284,7 +284,7 @@ const App = () => {
           </IconButton>
           <IconButton 
             color="inherit" 
-            href="https://t.me/yourusername" // Замените на свой username
+            href="https://t.me/my_mach95" // Замените на свой username
             target="_blank"
             sx={{ mx: 0.5 }}
           >
@@ -297,8 +297,8 @@ const App = () => {
         {/* Информация о времени до сброса */}
         {!isMobile && (
           <Box textAlign="center" mb={3}>
-            <Typography variant="subtitle1" gutterBottom>
-              Запишитесь на матч в удобное время
+            <Typography variant="subtitle1" gutterBottom color='white'>
+              Наш адрес."ул. Мохаммеда Бен Зайеда Аль Нахайяна,4А"
             </Typography>
             <Typography variant="caption" color="text.secondary">
               Данные обновятся через: {timeUntilReset}
