@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTheme } from '@mui/material/styles';
+import { CssBaseline } from '@mui/material';
 import { 
   Container, 
   Typography, 
@@ -138,9 +139,9 @@ const App = () => {
   const resetData = (today) => {
     // Формируем объект для матчей
     const initialMatches = {
-      match1: { time: 'NTPA-13:00', team1: [], team2: [] },
-      match2: { time: 'VTPA-15:00', team1: [], team2: [] },
-      match3: { time: 'VTPa-19:00', team1: [], team2: [] }
+      match1: { time: 'ИГРА-13:00', team1: [], team2: [] },
+      match2: { time: 'ИГРА-15:00', team1: [], team2: [] },
+      match3: { time: 'ИГРА-19:00', team1: [], team2: [] }
     };
     
     const updates = {
@@ -252,8 +253,19 @@ const App = () => {
   }
 
   return (
+    //public/dffdss.jpg
     <>
-      {/* AppBar с контактами */}
+<Box
+      sx={{
+        minHeight: '100vh',
+        backgroundImage: 'url(public/dffdss.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+        backgroundRepeat: 'no-repeat',
+      }}
+    >
+       {/* AppBar с контактами */}
       <AppBar position="sticky" sx={{ mb: 2 }}>
         <Toolbar>
           <SportsSoccer sx={{ mr: 2 }} />
@@ -316,7 +328,7 @@ const App = () => {
                     
                     <Grid container spacing={0} mt={1}>
                       <Grid xs={6} sx={{ textAlign: 'center' }}>
-                        <Typography variant="body2">Команда 1</Typography>
+                        <Typography variant="body2">1 Команда- - </Typography>
                         <Typography variant="caption" color="text.secondary">
                           ({match.team1?.length || 0})
                         </Typography>
@@ -375,7 +387,7 @@ const App = () => {
                 </AccordionSummary>
                 
                 <AccordionDetails sx={{ p: isMobile ? 0 : 2 }}>
-                  <Grid container spacing={1}>
+                  <Grid container spacing={20}>
                     <Grid xs={12} sm={6}>
                       <Paper elevation={0} sx={{ p: 1 }}>
                         <Typography variant="body2" fontWeight="bold">
@@ -395,7 +407,15 @@ const App = () => {
                                   size="small"
                                   onClick={() => removePlayer(match.id, 'team1', player.id)}
                                 >
-                                  <Delete fontSize="small" />
+                                  <Delete fontSize="large" 
+                                    sx={{ 
+    color: '#ff0000', // HEX-код цвета
+    marginLeft: 1,    // 8px (тема умножает на 8)
+    marginRight: -7,   // 16px
+    padding: 1,       // 8px со всех сторон
+  }}
+                                   />
+                                   
                                 </IconButton>
                               </ListItemSecondaryAction>
                             </ListItem>
@@ -427,7 +447,13 @@ const App = () => {
                                   size="small"
                                   onClick={() => removePlayer(match.id, 'team2', player.id)}
                                 >
-                                  <Delete fontSize="small" />
+                                  <Delete fontSize="large"
+                                  sx={{ 
+                                        color: '#ff0000',
+                                         marginLeft: 1,    
+                                         marginRight: -7,   
+                                         padding: 1,       
+                                            }} />
                                 </IconButton>
                               </ListItemSecondaryAction>
                             </ListItem>
@@ -567,6 +593,11 @@ const App = () => {
           </Alert>
         </Snackbar>
       </Container>
+      <CssBaseline /> {/* Сбрасываем стандартные стили браузера */}
+      {/* Остальной код вашего приложения */}
+    </Box>
+    
+     
     </>
   );
 };
