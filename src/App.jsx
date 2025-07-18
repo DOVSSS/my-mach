@@ -297,9 +297,7 @@ const App = () => {
         {/* Информация о времени до сброса */}
         {!isMobile && (
           <Box textAlign="center" mb={3}>
-            <Typography variant="subtitle1" gutterBottom color='white'>
-              Наш адрес."ул. Мохаммеда Бен Зайеда Аль Нахайяна,4А"
-            </Typography>
+           
             <Typography variant="caption" color="text.secondary">
               Данные обновятся через: {timeUntilReset}
             </Typography>
@@ -595,9 +593,34 @@ const App = () => {
       </Container>
       <CssBaseline /> {/* Сбрасываем стандартные стили браузера */}
       {/* Остальной код вашего приложения */}
+
+       
     </Box>
+
+    <Box 
+  component="footer"
+  sx={{
+    py: 3,
+    px: 2,
+    mt: 'auto',
+    backgroundColor: (theme) => 
+      theme.palette.mode === 'light'
+        ? theme.palette.grey[200]
+        : theme.palette.grey[800],
+    textAlign: 'center'
+  }}
+>
+  <Container maxWidth="sm">
+    <Typography variant="body1">
+      Наш адрес."ул. Мохаммеда Бен Зайеда Аль Нахайяна,4А"
+    </Typography>
+    <Typography variant="body2" color="text.secondary">
+      © {new Date().getFullYear()} Футбольный Организатор
+    </Typography>
+  </Container>
+</Box>
     
-     
+    
     </>
   );
 };
