@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
+
 import { 
   Container, 
   Typography, 
@@ -139,9 +140,9 @@ const App = () => {
   const resetData = (today) => {
     // Формируем объект для матчей
     const initialMatches = {
-      match1: { time: 'ИГРА-20:00', team1: [], team2: [] },
+      match1: { time: 'ИГРА-19:30', team1: [], team2: [] },
       match2: { time: 'ИГРА-21:00', team1: [], team2: [] },
-      match3: { time: 'ИГРА-22:00', team1: [], team2: [] }
+      match3: { time: 'ИГРА-22:30', team1: [], team2: [] }
     };
     
     const updates = {
@@ -253,8 +254,16 @@ const App = () => {
   }
 
   return (
-    //public/dffdss.jpg
+
+
+  
     <>
+
+
+
+
+
+
 <Box
       sx={{
         minHeight: '100vh',
